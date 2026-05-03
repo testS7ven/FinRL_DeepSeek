@@ -1,0 +1,53 @@
+data:
+  train_start: "2013-01-01"
+  train_end:   "2018-12-31"
+  test_start:  "2019-01-01"
+  test_end:    "2023-12-31"
+  initial_cash: 1_000_000
+  hmax: 100
+  indicators:
+    - macd
+    - rsi_30
+    - cci_30
+    - dx_30
+
+signals:
+  model:         "deepseek-ai/DeepSeek-V3"
+  base_url:      "https://api.deepinfra.com/v1/openai"
+  n_consistency: 3       # passes for self-consistency confidence
+  batch_size:    5
+  temperature:   0.0
+  cache_dir:     "risk_first/cache/signals"
+
+env:
+  reward_scaling:        1.0e-4
+  use_confidence:        true   # Module 1
+  use_reward_shaping:    true   # Module 2
+  use_circuit_breaker:   true   # Module 3
+  lambda_risk:           0.02   # reward shaping coefficient
+  cb_risk_threshold:     4.0    # circuit breaker activation
+  cb_sentiment_threshold: 2.0
+
+training:
+  epochs:          100
+  steps_per_epoch: 20000
+  gamma:           0.995
+  lam:             0.97
+  clip_ratio:      0.7
+  target_kl:       0.35
+  pi_lr:           3.0e-5
+  vf_lr:           1.0e-4
+  train_pi_iters:  100
+  train_v_iters:   80
+  hidden_sizes:    [512, 512]
+  seed:            42
+
+cppo:
+  alpha:           0.85    # CVaR percentile (85th)
+  beta:            3000.0  # CVaR threshold
+  cvar_clip_ratio: 0.8
+  delay:           1.0
+
+eval:
+  benchmark: "QQQ"
+  cvar_alpha: 0.05

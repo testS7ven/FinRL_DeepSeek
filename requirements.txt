@@ -1,0 +1,42 @@
+# ============================================================
+# FinRL-DeepSeek — Python Dependencies
+# ============================================================
+# Core environment: Python 3.10+
+# Install: pip install -r requirements.txt
+# ============================================================
+
+# --- Core Scientific Stack ---
+numpy>=1.24,<2.0
+pandas>=2.0
+scipy>=1.10
+
+# --- Deep Learning ---
+torch>=2.0
+# torchvision  # not needed for this project
+
+# --- Reinforcement Learning ---
+gymnasium>=0.28
+# spinningup_pytorch is installed from source (see setup instructions)
+
+# --- Finance ---
+yfinance>=0.2
+stockstats>=0.6
+# FinRL is installed from source: pip install git+https://github.com/benstaf/FinRL.git
+
+# --- LLM / DeepSeek API ---
+openai>=1.0
+
+# --- Data & HuggingFace ---
+datasets>=2.14
+huggingface_hub>=0.17
+
+# --- Visualization ---
+matplotlib>=3.7
+
+# --- MPI (parallel training) ---
+mpi4py>=3.1
+
+# --- Misc ---
+alpaca-py>=0.13
+selenium>=4.10
+webdriver-manager>=4.0
