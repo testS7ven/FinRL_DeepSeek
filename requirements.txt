@@ -12,16 +12,14 @@ scipy>=1.10
 
 # --- Deep Learning ---
 torch>=2.0
-# torchvision  # not needed for this project
 
 # --- Reinforcement Learning ---
 gymnasium>=0.28
-# spinningup_pytorch is installed from source (see setup instructions)
 
 # --- Finance ---
 yfinance>=0.2
+websockets>=12.0
 stockstats>=0.6
-# FinRL is installed from source: pip install git+https://github.com/benstaf/FinRL.git
 
 # --- LLM / DeepSeek API ---
 openai>=1.0
@@ -30,13 +28,12 @@ openai>=1.0
 datasets>=2.14
 huggingface_hub>=0.17
 
+# --- Config & Environment ---
+PyYAML>=6.0
+python-dotenv>=1.0
+
 # --- Visualization ---
 matplotlib>=3.7
 
-# --- MPI (parallel training) ---
+# --- MPI (baseline parallel training, Linux only) ---
 mpi4py>=3.1
-
-# --- Misc ---
-alpaca-py>=0.13
-selenium>=4.10
-webdriver-manager>=4.0
