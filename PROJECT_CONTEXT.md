@@ -290,8 +290,12 @@ Note: these are from a 3-epoch test, not a full 100-epoch run. Full training has
 | `risk_first/README.md` | Done |
 | `.gitignore` (root + risk_first/) | Done |
 | Git repo initialized + pushed | Done — [github.com/testS7ven/FinRL_DeepSeek](https://github.com/testS7ven/FinRL_DeepSeek) |
-| Full 100-epoch training run | **Not done** — needs a long run (hours) |
+| Pre-flight code review (May 2026) | Done — see section 10 for the two fixes applied |
+| Symmetric KL early-stop fix in ppo.py / cppo.py | Done |
+| Equity-curve persistence in pipeline.py | Done |
+| Full 100-epoch training run | **Not done** — needs a long run (estimated ~10–15 h on GPU, ~30–35 h on CPU for the full A→F ablation, single seed) |
 | Ablation study A→F | **Not done** — needs full training |
+| Multi-seed aggregation in run_ablation.py | **Not done** — currently single-seed (`seed=42`); recommended for paper |
 | Paper (LaTeX, NeurIPS format) | **Not done** |
 
 ---
@@ -304,6 +308,9 @@ Note: these are from a 3-epoch test, not a full 100-epoch run. Full training has
 | PyTorch warning on KL scalar conversion | Added `.detach()` before `.mean()` in ppo.py and cppo.py |
 | `CastError` when loading HuggingFace dataset | Use `hf_hub_download()` + `pd.read_csv()` instead of `datasets` library loader |
 | `Outperformance Frequency` missing from evaluation | Implemented in `metrics.py` |
+| KL early-stop never triggered when `kl < 0` (the approximate KL `mean(logp_old - logp_new)` can be negative due to sampling noise — the smoke logs showed KL = -6 to -20 across all PPO iterations, meaning the policy never short-circuited for the full 100 iters) | Changed test to `if abs(kl) > 1.5 * target_kl` in `ppo.py` and `cppo.py` |
+| Equity curves not persisted after each run (only the 4 final metrics ended up in `*_metrics.csv`, making paper-quality figures impossible) | Added `np.save(f"{run_name}_equity.npy", portfolio_arr)` and `f"{run_name}_benchmark.npy"` in `pipeline.run_pipeline` |
+| Smoke test (`config_test.yaml`) uses `steps_per_epoch=500` but a full episode on 2013–2018 is ~1500 trading days, so no episode terminates within an epoch and `AvgEpRet` stays at 0 across all 3 epochs (looks broken but isn't — it's just that `ep_rets` is never populated) | None applied. Recommendation: bump `steps_per_epoch` to 2000 in `config_test.yaml` for any future smoke. The full `config.yaml` already uses 20 000, which gives ~13 episodes per epoch. |
 
 ---
 
@@ -324,8 +331,55 @@ mpi4py>=3.1         (baseline only, Linux)
 
 ## 12. What to do next
 
-1. **Run full training** — `python -m risk_first.pipeline` on a machine with enough RAM (ideally 16 GB+). With 100 epochs × 20,000 steps × 84 tickers the run takes several hours. Monitor `AvgEpRet`, `KL`, `cvarlam`.
+### Pre-flight checks before launching the ablation
 
-2. **Run the ablation** — `python -m risk_first.run_ablation`. Produces `risk_first/results/ablation_summary.csv` comparing A→F. This is the main result table for the paper.
+These have already been done in the most recent code review:
 
-3. **Write the paper** — LaTeX, NeurIPS format. Sections: introduction, related work, method (the three modules), experiments (ablation table + equity curves), conclusion.
+1. ✓ Verified pipeline + run_ablation wire A→F correctly (`env_overrides` per config, test env forces `use_reward_shaping=False`).
+2. ✓ Verified M1/M2/M3 are toggled by config flags through `pipeline.build_env`.
+3. ✓ Verified the HF cache (`risk_first/cache/{train,test}.csv`, 84 tickers, all signal columns present).
+4. ✓ Applied the symmetric KL early-stop fix (see section 10).
+5. ✓ Added equity-curve persistence (`*_equity.npy` + `*_benchmark.npy` per config).
+
+Still **TODO** before launching:
+
+6. Cleanup smoke-test artefacts so the new ablation outputs aren't mixed with old ones:
+   ```
+   rm -f risk_first/models/{ppo_baseline,ppo_llm,test_full}_agent.pth
+   rm -f risk_first/results/{ppo_baseline,ppo_llm}_metrics.csv
+   rm -f risk_first/results/ablation_results.json
+   rm -f risk_first/logs/{ppo_baseline,ppo_llm}.log
+   ```
+   This is purely cosmetic — the new `run_ablation.py` saves under names `A_PPO_baseline_*`, `B_PPO_LLM_*`, etc., so there's no collision with the leftover files. But it's cleaner to start from an empty `models/` and `results/`.
+
+7. Re-run the smoke with `steps_per_epoch ≥ 2000` to confirm `AvgEpRet ≠ 0` and the KL early-stop fires correctly:
+   ```
+   python -m risk_first.pipeline --config risk_first/config_test.yaml --no-llm
+   ```
+
+8. **Decide single-seed vs multi-seed.** Currently `run_ablation.py` runs each config once (`seed=42` in `config.yaml`). For a paper-quality table you want 3 seeds and report mean ± std. This requires ~30 lines of changes to `run_ablation.py` (a `for seed in [42, 123, 7]:` loop + aggregation). Trade-off: 1 seed ≈ 12–35 h total runtime, 3 seeds ≈ 3 days–4 days.
+
+### Runtime estimate (refined from smoke logs)
+
+Smoke test measured: PPO without LLM ≈ 3.4 ms/step, PPO with LLM ≈ 10 ms/step (84 tickers, single CPU thread). The PPO update cost scales with `steps_per_epoch` × `train_pi_iters`.
+
+| Config family | Per epoch | × 100 epochs | 6 configs total |
+| ------------- | --------- | ------------ | --------------- |
+| CPU, no LLM (A, C) | ~2 min | ~3 h | included below |
+| CPU, with LLM (B, D, E, F) | ~4–5 min | ~7–8 h | — |
+| **Total CPU, 1 seed** | — | — | **~30–35 h** (≈ 1.5 day) |
+| **Total GPU, 1 seed** | — | — | **~10–15 h** (overnight) |
+| **Total CPU, 3 seeds** | — | — | **~4 days** |
+
+Calibrate empirically: launch config A first and look at the `Time` field in the log after 5 epochs. If `Time ≈ 120s`, then config A ≈ 3.3 h, F ≈ 8–10 h, full ablation ≈ 25–35 h on CPU.
+
+### Optional optimisations (not required for first run)
+
+- **Vectorise the circuit-breaker** (`trading_env.py` lines 130–137): the `for i in range(self.n)` loop in Python is the dominant cost for config F. Numpy mask version ≈ 5 lines, ~2–3× speedup expected.
+- **GPU support**: `cppo_train` and `ppo_train` don't call `.to(device)` on the network. With CUDA available, adding 4 lines (move agent + tensors to `cuda`) would reduce the PPO-update cost from ~30s to ~3s per epoch on bigger configs.
+
+### Then
+
+9. **Run the ablation** — `python -m risk_first.run_ablation`. Produces `risk_first/results/ablation_summary.csv` comparing A→F + per-config equity curves (`.npy`) for plots. This is the main result table for the paper.
+
+10. **Write the paper** — LaTeX, NeurIPS format. Sections: introduction, related work, method (the three modules), experiments (ablation table + equity curves), conclusion.

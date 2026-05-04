@@ -151,6 +151,9 @@ def run_pipeline(
     pd.DataFrame([{"model": run_name, **metrics}]).to_csv(
         results_dir / f"{run_name}_metrics.csv", index=False
     )
+    # Persist equity curves for paper plots (one file per ablation config)
+    np.save(results_dir / f"{run_name}_equity.npy",    portfolio_arr)
+    np.save(results_dir / f"{run_name}_benchmark.npy", np.asarray(benchmark_values))
 
     return metrics
 

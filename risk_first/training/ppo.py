@@ -90,7 +90,11 @@ def ppo_train(
             clip_adv   = torch.clamp(ratio, 1 - cfg["clip_ratio"], 1 + cfg["clip_ratio"]) * adv_t
             pi_loss    = -torch.min(ratio * adv_t, clip_adv).mean()
             kl         = float((logp_old - logp_new).detach().mean())
-            if kl > 1.5 * cfg["target_kl"]:
+            # Symmetric early-stop: catches both positive and negative KL drift
+            # (the approx KL `mean(logp_old - logp_new)` can be negative due to
+            # sampling noise; the original `kl > threshold` test never fires
+            # in that regime and lets the policy update for the full 100 iters).
+            if abs(kl) > 1.5 * cfg["target_kl"]:
                 break
             pi_loss.backward()
             pi_opt.step()
