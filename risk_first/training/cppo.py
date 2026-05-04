@@ -106,7 +106,8 @@ def cppo_train(
         last_portfolio_history = portfolio_hist
 
         # ── Update CVaR threshold nu and Lagrange multiplier ──────────────────
-        if ep_rets_for_cvar:
+        # Need at least 2 completed episodes to estimate a meaningful tail
+        if len(ep_rets_for_cvar) >= 2:
             sorted_rets = np.sort(ep_rets_for_cvar)
             tail_idx    = int(len(sorted_rets) * (1.0 - alpha))
             tail_idx    = max(1, min(tail_idx, len(sorted_rets) - 1))

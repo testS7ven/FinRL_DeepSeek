@@ -36,7 +36,7 @@ class ActorCritic(nn.Module):
         dist, v      = self(obs_t)
         a            = dist.sample()
         a_clipped    = torch.clamp(a, -1.0, 1.0)
-        logp         = dist.log_prob(a).sum()
+        logp         = dist.log_prob(a_clipped).sum()   # logp on clamped action (same as evaluate)
         return a_clipped.numpy(), float(v), float(logp)
 
     def evaluate(

@@ -33,7 +33,7 @@ env:
 
 training:
   epochs:          3        # 3 au lieu de 100
-  steps_per_epoch: 500      # 500 au lieu de 20000
+  steps_per_epoch: 2000     # 2000 pour compléter au moins 1 épisode (~1500 steps)
   gamma:           0.995
   lam:             0.97
   clip_ratio:      0.7
