@@ -70,6 +70,8 @@ risk_first/
 ├── config_test.yaml     # fast smoke-test (3 epochs, 500 steps)
 ├── pipeline.py          # train + evaluate in one command
 ├── run_ablation.py      # runs configurations A through F
+├── plot_results.py      # generates publication-ready equity curves
+├── kaggle_ablation.ipynb# notebook for fast execution on Kaggle GPUs
 │
 ├── signals/
 │   └── llm_signals.py   # Module 1: self-consistency confidence
@@ -96,11 +98,13 @@ risk_first/
 ## Setup
 
 ```bash
-# Copy the env template and add your DeepInfra key
+# Linux / macOS
 cp risk_first/.env.example risk_first/.env
-
-# Install dependencies (venv already configured)
 pip install -r requirements.txt
+
+# Windows
+copy risk_first\.env.example risk_first\.env
+pip install -r requirements_windows.txt
 ```
 
 The pre-computed DeepSeek-V3 signals from the original paper are available at `benstaf/nasdaq_2013_2023` on HuggingFace. The pipeline downloads them automatically on first run — no API key needed for data.
@@ -118,7 +122,12 @@ python -m risk_first.pipeline
 
 # Full ablation study: trains A through F, saves comparison table
 python -m risk_first.run_ablation
+
+# Generate equity curve plots for the paper (requires completed ablation run)
+python plot_results.py
 ```
+
+> **Note on Performance:** Training the 6 configurations (A-F) can take time on CPU. You can use the provided `kaggle_ablation.ipynb` to run the entire pipeline seamlessly on a Kaggle T4x2 GPU instance.
 
 The pipeline stages:
 

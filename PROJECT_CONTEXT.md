@@ -293,10 +293,12 @@ Note: these are from a 3-epoch test, not a full 100-epoch run. Full training has
 | Pre-flight code review (May 2026) | Done — see section 10 for the two fixes applied |
 | Symmetric KL early-stop fix in ppo.py / cppo.py | Done |
 | Equity-curve persistence in pipeline.py | Done |
-| Full 100-epoch training run | **Not done** — needs a long run (estimated ~10–15 h on GPU, ~30–35 h on CPU for the full A→F ablation, single seed) |
-| Ablation study A→F | **Not done** — needs full training |
-| Multi-seed aggregation in run_ablation.py | **Not done** — currently single-seed (`seed=42`); recommended for paper |
-| Paper (LaTeX, NeurIPS format) | **Not done** |
+| Full 100-epoch training run | **In progress** — Configs A to E are done, F is currently computing on Kaggle GPU. |
+| Ablation study A→F | **In progress** — Awaiting F. |
+| Multi-seed aggregation in run_ablation.py | **Skipped** — Sticking to a single seed due to the May 5th deadline constraints. |
+| Paper (Markdown draft, NeurIPS format) | **Done** — `paper_draft.md` is fully structured and written, awaiting Config F numbers. |
+| Visualisation scripts | **Done** — `plot_results.py` created to generate publication-ready equity curves. |
+| Kaggle GPU integration | **Done** — `kaggle_ablation.ipynb` created and actively used for training. |
 
 ---
 
@@ -380,6 +382,10 @@ Calibrate empirically: launch config A first and look at the `Time` field in the
 
 ### Then
 
-9. **Run the ablation** — `python -m risk_first.run_ablation`. Produces `risk_first/results/ablation_summary.csv` comparing A→F + per-config equity curves (`.npy`) for plots. This is the main result table for the paper.
+9. **Wait for Config F** — The `kaggle_ablation.ipynb` notebook is currently finishing the computation for Config F.
 
-10. **Write the paper** — LaTeX, NeurIPS format. Sections: introduction, related work, method (the three modules), experiments (ablation table + equity curves), conclusion.
+10. **Finalise the paper** — Plug Config F results into `paper_draft.md`, run `plot_results.py` to generate the final equity curve plots, and convert the Markdown text to LaTeX using the official NeurIPS Overleaf template.
+
+11. **Review loop** — As per submission requirements, submit the LaTeX source to ChatGPT, Claude, Grok, and Gemini for a NeurIPS-level review. Iterate if any of them rejects the paper.
+
+12. **Final Submission** — Submit to OpenReview, cross-post to HAL/arXiv, and ensure the GitHub repository is public and updated.
