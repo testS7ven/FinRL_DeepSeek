@@ -122,6 +122,13 @@ Six configurations were tested incrementally:
   \end{tabular}
 \end{table}
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{risk_first/results/equity_curves.png}
+  \caption{Equity curves — ablation A through F vs QQQ benchmark (2019-2023). Config F (Risk-First Full) achieves the lowest Max Drawdown while maintaining strong returns.}
+  \label{fig:equity_curves}
+\end{figure}
+
 The table shows that the LLM only helps when the agent is structurally forced to act on it:
 \begin{itemize}
     \item \textbf{Failure of standard approaches (Configs A, B, C):} The baseline models do not protect against crashes. Config B shows that giving raw LLM text to the agent changes nothing: the network ignores the semantic signal and follows price momentum. Config C shows that the statistical CVaR constraint stays inactive because historical data alone cannot anticipate the crash.
