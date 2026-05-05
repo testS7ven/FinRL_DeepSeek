@@ -1,0 +1,2 @@
+model,cumulative_return,sharpe_ratio,rachev_ratio,outperformance_frequency,max_drawdown
+D_CPPO_confidence,168.70596812064647,0.7522169855809079,0.9260209545928575,52.27091633466136,-57.369254564957906

@@ -1,0 +1,2 @@
+model,cumulative_return,sharpe_ratio,rachev_ratio,outperformance_frequency,max_drawdown
+E_CPPO_shaping,179.76637976830006,0.7732371773520212,0.9388526292158486,51.07569721115538,-56.50854745352984

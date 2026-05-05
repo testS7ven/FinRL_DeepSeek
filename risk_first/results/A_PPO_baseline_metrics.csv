@@ -1,0 +1,2 @@
+model,cumulative_return,sharpe_ratio,rachev_ratio,outperformance_frequency,max_drawdown
+A_PPO_baseline,160.07747764360906,0.7264701009521368,0.914785436260926,52.27091633466136,-58.36665574985205
