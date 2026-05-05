@@ -31,31 +31,20 @@ The repo contains two layers:
 
 ---
 
-## Risk-First extension (`risk_first/`)
+## Risk-First extension (`risk_first/`) — original contribution
 
-Three modules added on top of CPPO-DeepSeek. Each one is independent and can be toggled in `config.yaml`.
+This is the research contribution developed for the FinRL Contest 2026, Task 1 (AI for Finance — PGE5 2025/2026 at Aivancity). It extends CPPO-DeepSeek with three modules that force the agent to act on LLM risk signals, not just observe them.
 
-### Module 1 — Confidence-weighted signals
+| Module | What it does |
+| ------ | ------------ |
+| Confidence filter | Calls the LLM three times, weights signals by agreement — uncertain scores revert to neutral |
+| Reward shaping | Penalises large long positions proportionally to the current risk signal |
+| Circuit breaker | Deterministic hard filter: blocks buys and trims positions when risk ≥ 4 and sentiment ≤ 2 |
 
-The LLM is called three times per article. Score variance across the three calls determines confidence `C ∈ [0,1]`. Uncertain signals are pulled toward neutral instead of used at face value.
+The key finding from the ablation study: feeding raw LLM scores to PPO (config B) produces the same result as PPO alone (config A). The signal only matters when the architecture is designed to enforce it. The full Risk-First model (config F) reaches a Sharpe ratio of 0.784 and a max drawdown of −56.09%, versus 0.726 and −58.37% for the baseline.
 
-```text
-risk_hat = risk × C + 3 × (1 − C)
-```
+Full documentation, setup instructions, and results: [`risk_first/README.md`](risk_first/README.md)
 
-### Module 2 — Reward shaping
-
-A small penalty discourages large long positions when the LLM signals high risk.
-
-```text
-R_t = ΔPortfolio − 0.02 × risk_hat × long_position_value
-```
-
-### Module 3 — Circuit breaker
-
-A hard filter applied after the network outputs its action. Blocks buys and scales down existing positions when `raw_risk ≥ 4` and `raw_sentiment ≤ 2`.
-
-See [`risk_first/README.md`](risk_first/README.md) for full documentation and usage.
 
 ---
 

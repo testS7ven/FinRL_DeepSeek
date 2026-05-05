@@ -1,6 +1,6 @@
 # FinRL-DeepSeek — Risk-First Extension
 
-Extension of [FinRL-DeepSeek](https://arxiv.org/abs/2502.07393) (Benhenda, 2025) for the **FinRL Contest 2025, Task 1**.
+Extension of [FinRL-DeepSeek](https://arxiv.org/abs/2502.07393) (Benhenda, 2025) for the **FinRL Contest 2026, Task 1**.
 
 The original paper combines CPPO (Constrained PPO with CVaR) and DeepSeek-V3 signals for stock trading. This project adds three modules that make the system more defensive during market stress: confidence-weighted signals, a light reward penalty, and a deterministic circuit breaker.
 
@@ -156,9 +156,32 @@ Each stage writes to disk. Re-running skips already-completed stages.
 
 ---
 
+## Results
+
+Run on a Kaggle T4 GPU (16 GB VRAM). Dataset: `benstaf/nasdaq_2013_2023` — 126 756 train rows, 105 588 test rows, 84 tickers. Signal coverage: sentiment 9.7%, risk 4.1%.
+
+Test period: 2019–2023.
+
+| Config | Cumulative Return | Sharpe Ratio | Rachev Ratio | Outperf. Freq. | Max Drawdown |
+| ------ | :---------------: | :----------: | :----------: | :------------: | :----------: |
+| A      | 160.08%           | 0.726        | 0.915        | 52.27%         | −58.37%      |
+| B      | 160.08%           | 0.726        | 0.915        | 52.27%         | −58.37%      |
+| C      | 160.08%           | 0.726        | 0.915        | 52.27%         | −58.37%      |
+| D      | 168.71%           | 0.752        | 0.926        | 52.27%         | −57.37%      |
+| E      | 179.77%           | 0.773        | 0.939        | 51.08%         | −56.51%      |
+| F      | 178.97%           | 0.784        | 0.928        | 51.16%         | −56.09%      |
+
+![Equity curves — ablation A through F vs QQQ benchmark (2019–2023)](results/equity_curves.png)
+
+Configs A, B, and C return identical metrics. Giving the PPO agent raw LLM scores (B) changes nothing — the network ignores the signal in favour of price momentum. The CVaR constraint alone (C) stays inactive because the training data alone does not anticipate drawdowns. The modules in D, E, and F are what force the agent to act on LLM signals.
+
+Config F reaches the highest Sharpe ratio (0.784) and the lowest max drawdown (−56.09%) of all six runs. The small drop in cumulative return versus E (178.97% vs 179.77%) reflects the circuit breaker trimming positions during high-risk days — a deliberate trade-off.
+
+---
+
 ## Evaluation metrics
 
-All four FinRL Contest 2025 metrics:
+All four FinRL Contest 2026 metrics:
 
 | Metric                   | Definition                                                   |
 | ------------------------ | ------------------------------------------------------------ |

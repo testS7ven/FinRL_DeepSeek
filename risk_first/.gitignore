@@ -10,6 +10,9 @@ cache/
 models/
 logs/
 results/
+!results/*.png
+!results/*.csv
+!results/*.json
 
 # Jupyter
 .ipynb_checkpoints/
