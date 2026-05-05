@@ -89,8 +89,14 @@ risk_first/
 │   ├── ppo.py           # PPO trainer
 │   └── cppo.py          # CPPO trainer with CVaR + LLM risk factor
 │
-└── evaluation/
-    └── metrics.py       # all 4 contest metrics
+├── evaluation/
+│   └── metrics.py       # all 4 contest metrics
+│
+└── results/             # generated after ablation run
+    ├── equity_curves.png          # equity curve plot (A–F vs QQQ)
+    ├── ablation_summary.csv       # one row per configuration
+    ├── ablation_results.json      # full metrics in JSON
+    └── {config}_metrics.csv       # per-config detailed metrics
 ```
 
 ---
