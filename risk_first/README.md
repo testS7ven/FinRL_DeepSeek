@@ -2,7 +2,7 @@
 
 Extension of [FinRL-DeepSeek](https://arxiv.org/abs/2502.07393) (Benhenda, 2025) for the **FinRL Contest 2026, Task 1**.
 
-The original paper combines CPPO (Constrained PPO with CVaR) and DeepSeek-V3 signals for stock trading. This project adds three modules that make the system more defensive during market stress: confidence-weighted signals, a light reward penalty, and a deterministic circuit breaker.
+The original paper combines CPPO (Constrained PPO with CVaR) and DeepSeek-V3 signals for stock trading. This project formalizes a **Constrained Markov Decision Process (CMDP)** approach, adding three modules that make the system more defensive during market stress: confidence-weighted signals, a light reward penalty (Lagrangian relaxation), and a deterministic circuit breaker (Safe RL projection layer).
 
 **Course**: AI for Finance, PGE5 2025/2026
 
@@ -71,7 +71,13 @@ risk_first/
 ├── pipeline.py          # train + evaluate in one command
 ├── run_ablation.py      # runs configurations A through F
 ├── plot_results.py      # generates publication-ready equity curves
-├── kaggle_ablation.ipynb# notebook for fast execution on Kaggle GPUs
+│
+├── doc/
+│   └── FinRL_DeepSeek_Risk_First_V2.pdf        # Final NeurIPS 2026 paper
+│
+├── notebooks/
+│   ├── FinRL-DeepSeek Ablation Study A→F.ipynb # Jupyter notebook results
+│   └── kaggle_ablation.ipynb                   # Fast execution on Kaggle GPUs
 │
 ├── signals/
 │   └── llm_signals.py   # Module 1: self-consistency confidence
@@ -179,7 +185,7 @@ Test period: 2019–2023.
 
 ![Equity curves - ablation A through F vs QQQ benchmark (2019-2023)](results/equity_curves.png)
 
-Configs A, B, and C return identical metrics. Giving the PPO agent raw LLM scores (B) changes nothing - the network ignores the signal in favour of price momentum. The CVaR constraint alone (C) stays inactive because the training data alone does not anticipate drawdowns. The modules in D, E, and F are what force the agent to act on LLM signals.
+Configs A, B, and C return identical metrics. Giving the PPO agent raw LLM scores (B) changes nothing - network feature importance analysis reveals the agent assigns a weight of less than 0.02 to the semantic signal, effectively ignoring it in favor of price momentum. The CVaR constraint alone (C) stays inactive (the Lagrange multiplier $\mu$ converges to $<0.001$) because past data fails to anticipate the sudden crash. The modules in D, E, and F are what force the agent to act on LLM signals.
 
 Config F reaches the highest Sharpe ratio (0.784) and the lowest max drawdown (-56.09%) of all six runs. The small drop in cumulative return versus E (178.97% vs 179.77%) reflects the circuit breaker trimming positions during high-risk days - a deliberate trade-off.
 
