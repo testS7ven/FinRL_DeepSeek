@@ -1,10 +1,10 @@
-# FinRL-DeepSeek — Risk-First Extension
+# FinRL-DeepSeek - Risk-First Extension
 
 Extension of [FinRL-DeepSeek](https://arxiv.org/abs/2502.07393) (Benhenda, 2025) for the **FinRL Contest 2026, Task 1**.
 
 The original paper combines CPPO (Constrained PPO with CVaR) and DeepSeek-V3 signals for stock trading. This project adds three modules that make the system more defensive during market stress: confidence-weighted signals, a light reward penalty, and a deterministic circuit breaker.
 
-**Course**: AI for Finance — PGE5 2025/2026
+**Course**: AI for Finance, PGE5 2025/2026
 
 ---
 
@@ -12,9 +12,9 @@ The original paper combines CPPO (Constrained PPO with CVaR) and DeepSeek-V3 sig
 
 The paper trains a trading agent on 84 NASDAQ stocks (2013–2023) using:
 
-- **PPO** — standard policy gradient, no risk constraint
-- **CPPO** — PPO with a CVaR constraint that caps losses in the worst 5% of days
-- **DeepSeek-V3** — reads daily news and scores each stock: sentiment 1–5 and risk 1–5
+- **PPO**: standard policy gradient, no risk constraint
+- **CPPO**: PPO with a CVaR constraint that caps losses in the worst 5% of days
+- **DeepSeek-V3**: reads daily news and scores each stock: sentiment 1–5 and risk 1–5
 
 Main finding: in bull markets PPO wins on return; in bear markets CPPO-DeepSeek wins on drawdown.
 
@@ -24,7 +24,7 @@ Main finding: in bull markets PPO wins on return; in bear markets CPPO-DeepSeek 
 
 Three modules, each independent and toggleable via `config.yaml`.
 
-### Module 1 — Confidence-weighted signals
+### Module 1 - Confidence-weighted signals
 
 The original code trusts the LLM score at face value. A vague article and a detailed one get the same weight.
 
@@ -36,7 +36,7 @@ risk_hat = risk × C + 3 × (1 − C)
 
 `C = 1` when all three calls agree. `C = 0` when they disagree completely → signal collapses to neutral regardless of the raw score.
 
-### Module 2 — Reward shaping
+### Module 2 - Reward shaping
 
 The CPPO agent optimises CVaR on trajectory-level returns, but its step-level reward is blind to current LLM risk signals.
 
@@ -48,7 +48,7 @@ R_t = ΔPortfolio − λ × risk_hat × long_position_value
 
 `λ = 0.02` keeps the penalty small enough not to override the CVaR objective. The agent stays active; it just costs slightly more to hold large positions when the LLM is nervous.
 
-### Module 3 — Circuit breaker
+### Module 3 - Circuit breaker
 
 A hard filter applied after the network outputs its action, before the order executes.
 
@@ -58,7 +58,7 @@ if raw_risk >= 4 and raw_sentiment <= 2:
     scale existing positions by (1 − 0.25 × (risk − 3))
 ```
 
-At risk=5: scale=0.5, positions halved. At risk=4: scale=0.75. The raw (unweighted) scores are used here deliberately — the circuit breaker reacts to extremes, not averages.
+At risk=5: scale=0.5, positions halved. At risk=4: scale=0.75. The raw (unweighted) scores are used here deliberately: the circuit breaker reacts to extremes, not averages.
 
 ---
 
@@ -177,11 +177,11 @@ Test period: 2019–2023.
 | E      | 179.77%           | 0.773        | 0.939        | 51.08%         | −56.51%      |
 | F      | 178.97%           | 0.784        | 0.928        | 51.16%         | −56.09%      |
 
-![Equity curves — ablation A through F vs QQQ benchmark (2019–2023)](results/equity_curves.png)
+![Equity curves - ablation A through F vs QQQ benchmark (2019-2023)](results/equity_curves.png)
 
-Configs A, B, and C return identical metrics. Giving the PPO agent raw LLM scores (B) changes nothing — the network ignores the signal in favour of price momentum. The CVaR constraint alone (C) stays inactive because the training data alone does not anticipate drawdowns. The modules in D, E, and F are what force the agent to act on LLM signals.
+Configs A, B, and C return identical metrics. Giving the PPO agent raw LLM scores (B) changes nothing - the network ignores the signal in favour of price momentum. The CVaR constraint alone (C) stays inactive because the training data alone does not anticipate drawdowns. The modules in D, E, and F are what force the agent to act on LLM signals.
 
-Config F reaches the highest Sharpe ratio (0.784) and the lowest max drawdown (−56.09%) of all six runs. The small drop in cumulative return versus E (178.97% vs 179.77%) reflects the circuit breaker trimming positions during high-risk days — a deliberate trade-off.
+Config F reaches the highest Sharpe ratio (0.784) and the lowest max drawdown (-56.09%) of all six runs. The small drop in cumulative return versus E (178.97% vs 179.77%) reflects the circuit breaker trimming positions during high-risk days - a deliberate trade-off.
 
 ---
 

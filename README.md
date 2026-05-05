@@ -2,9 +2,9 @@
 
 [![Discord](https://dcbadge.limes.pink/api/server/ekrySuRBf4)](https://discord.gg/ekrySuRBf4)
 
-**Paper**: [arXiv:2502.07393](https://arxiv.org/abs/2502.07393) — Mostapha Benhenda  
+**Paper**: [arXiv:2502.07393](https://arxiv.org/abs/2502.07393) : Mostapha Benhenda  
 **Blog**: [melwy.com/finrl_deepseek](https://melwy.com/finrl_deepseek)  
-**FinRL Contest 2025 — Task 1**: [open-finance-lab.github.io/FinRL_Contest_2025](https://open-finance-lab.github.io/FinRL_Contest_2025/)  
+**FinRL Contest 2025, Task 1**: [open-finance-lab.github.io/FinRL_Contest_2025](https://open-finance-lab.github.io/FinRL_Contest_2025/)  
 **Integrated into**: [AI4Finance-Foundation/FinRL_DeepSeek](https://github.com/AI4Finance-Foundation/FinRL_DeepSeek)
 
 ---
@@ -15,8 +15,8 @@ This project trains stock trading agents on 84 NASDAQ stocks using reinforcement
 
 The repo contains two layers:
 
-- **Baseline** (`data/`, `envs/`, `training/`, `evaluation/`) — the original four agents from the paper: PPO, CPPO, PPO-DeepSeek, CPPO-DeepSeek.
-- **Risk-First extension** (`risk_first/`) — a cleaner, single-file-per-module reimplementation that adds three new modules on top of CPPO-DeepSeek, developed for the FinRL Contest 2025.
+- **Baseline** (`data/`, `envs/`, `training/`, `evaluation/`) - the original four agents from the paper: PPO, CPPO, PPO-DeepSeek, CPPO-DeepSeek.
+- **Risk-First extension** (`risk_first/`) - a cleaner, single-file-per-module reimplementation that adds three new modules on top of CPPO-DeepSeek, developed for the FinRL Contest 2025.
 
 ---
 
@@ -31,13 +31,13 @@ The repo contains two layers:
 
 ---
 
-## Risk-First extension (`risk_first/`) — original contribution
+## Risk-First extension (`risk_first/`) - original contribution
 
-This is the research contribution developed for the FinRL Contest 2026, Task 1 (AI for Finance — PGE5 2025/2026 at Aivancity). It extends CPPO-DeepSeek with three modules that force the agent to act on LLM risk signals, not just observe them.
+This is the research contribution developed for the FinRL Contest 2026, Task 1 (AI for Finance, PGE5 2025/2026 at Aivancity). It extends CPPO-DeepSeek with three modules that force the agent to act on LLM risk signals, not just observe them.
 
 | Module | What it does |
 | ------ | ------------ |
-| Confidence filter | Calls the LLM three times, weights signals by agreement — uncertain scores revert to neutral |
+| Confidence filter | Calls the LLM three times, weights signals by agreement; uncertain scores revert to neutral |
 | Reward shaping | Penalises large long positions proportionally to the current risk signal |
 | Circuit breaker | Deterministic hard filter: blocks buys and trims positions when risk ≥ 4 and sentiment ≤ 2 |
 
